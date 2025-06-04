@@ -33,5 +33,17 @@ public class MockController {
         return "hello stock deduct！！";
     }
 
+    @GetMapping("/stock/optimisticRetryByRecursive")
+    public String optimisticRetryByRecursive(@RequestParam("productId") Long productId){
+        stockService.optimisticRetryByRecursive(productId);
+        return "hello stock deduct！！";
+    }
+
+    @GetMapping("/stock/optimisticRetryBySpinning")
+    public String optimisticRetryBySpinning(@RequestParam("productId") Long productId){
+        stockService.optimisticRetryBySpinning(productId);
+        return "hello stock deduct！！";
+    }
+
 }
 

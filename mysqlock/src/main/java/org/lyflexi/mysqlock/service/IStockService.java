@@ -28,4 +28,21 @@ public interface IStockService extends IService<Stock> {
      */
     public void deductOptimistic(Long productId);
 
+    /**
+     * @description: mysql乐观锁：版本号机制 往往搭配重试机制，这里使用递归重试
+     * @author: hmly
+     * @date: 2025/6/4 21:23
+     * @param: [productId]
+     * @return: void
+     **/
+    public void optimisticRetryByRecursive(Long productId);
+
+    /**
+     * @description: mysql乐观锁：版本号机制 往往搭配重试机制，这里使用自旋重试
+     * @author: hmly
+     * @date: 2025/6/4 21:34
+     * @param: [productId]
+     * @return: void
+     **/
+    public void optimisticRetryBySpinning(Long productId);
 }

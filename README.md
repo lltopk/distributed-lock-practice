@@ -29,6 +29,11 @@ update stock set count = count - 1 where product_id = 1 and count > 0;
     where product_id = #{stock.productId} and version = #{stock.version}
 </update>
 ```
+乐观锁版本号需要搭配重试机制，你可以设置重试次数，有两种重试方案：
+- 递归重试，由于递归容易OOM，因此递归适用于重试次数较少的场景
+- 自旋重试，类似于redis分布式锁
+
+下面讲到redis分布式锁的时候也会用到重试机制，所以你可以看到，其实知识是相通的
 
 
 MySQL虽然能解决超卖的问题，但是会受限于MySQL软件本身，在高并发的场景下支持不是很理想。

@@ -68,4 +68,70 @@ public class StockService extends ServiceImpl<StockMapper, Stock> implements ISt
         }
     }
 
+    private static final Integer retry = 10;
+    @Override
+    public void optimisticRetryByRecursive(Long productId) {
+        Stock stock = null;
+        try {
+            stock = this.getOne(Wrappers.<Stock>lambdaQuery()
+                    .eq(Stock::getProductId, productId));
+        } catch (Exception e) {
+            throw new RuntimeException("getOne库存异常");
+        }
+
+        if (stock == null) {
+            return;
+        }
+        doRetryByRecursive(stock,retry);
+    }
+
+    @Override
+    public void optimisticRetryBySpinning(Long productId) {
+        Stock stock = null;
+        try {
+            stock = this.getOne(Wrappers.<Stock>lambdaQuery()
+                    .eq(Stock::getProductId, productId));
+        } catch (Exception e) {
+            throw new RuntimeException("getOne库存异常");
+        }
+
+        if (stock == null) {
+            return;
+        }
+        doRetryBySpinning(stock,retry);
+    }
+
+    private void doRetryBySpinning(Stock stock, Integer retry) {
+        stock.setCount(stock.getCount()-1);
+        Long productId = stock.getProductId();
+        do{
+            //返回0表示cas失败
+            int flag = this.baseMapper.updateStockOptimistic(stock);
+            //cas成功
+            if (flag ==1 ) {
+                break;
+            }
+            retry--;
+            log.info("乐观锁自旋重试：当前商品：{}",productId);
+        }while (retry > 0);
+    }
+
+    private void doRetryByRecursive(Stock stock, int retry) {
+        stock.setCount(stock.getCount()-1);
+        Long productId = stock.getProductId();
+        //返回0表示cas失败
+        int flag = this.baseMapper.updateStockOptimistic(stock);
+        //cas成功
+        if (flag ==1 ) {
+            return;
+        }
+        //cas失败重试
+        if (retry > 0) {
+            retry--;
+            log.info("乐观锁递归重试：当前商品：{}",productId);
+            doRetryByRecursive(stock,retry);
+        }
+
+    }
+
 }
