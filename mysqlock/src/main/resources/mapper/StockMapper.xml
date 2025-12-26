@@ -19,4 +19,7 @@
         set count = #{stock.count} ,version = version +1
         where product_id = #{stock.productId} and version = #{stock.version}
     </update>
+    <update id="modifyName">
+        update stock set name = #{modifyName} where product_id = #{productId}
+    </update>
 </mapper>

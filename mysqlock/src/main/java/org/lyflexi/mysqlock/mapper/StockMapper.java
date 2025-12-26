@@ -40,6 +40,8 @@ public interface StockMapper extends BaseMapper<Stock> {
      * @return
      */
     public int updateStockOptimistic(@Param("stock") Stock stock) ;
+
+    void modifyName(@Param("productId")Long productId, @Param("modifyName") String modifyName);
 }
 
 

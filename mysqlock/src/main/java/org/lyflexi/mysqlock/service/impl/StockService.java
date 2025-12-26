@@ -37,6 +37,11 @@ public class StockService extends ServiceImpl<StockMapper, Stock> implements ISt
     public void deductForUpdate(Long productId) {
         //先加for update锁
         Stock stock = this.baseMapper.selectStockForUpdate(productId);
+        try {
+            Thread.sleep(10000l);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         if (stock != null) {
             //count = count -1 不写在sql内，模拟线程不安全的操作，看前面的for update 是否生效
             stock.setCount(stock.getCount()-1);
@@ -99,6 +104,11 @@ public class StockService extends ServiceImpl<StockMapper, Stock> implements ISt
             return;
         }
         doRetryBySpinning(stock,retry);
+    }
+
+    @Override
+    public void modifyName(Long productId, String modifyName) {
+        this.baseMapper.modifyName(productId,modifyName);
     }
 
     private void doRetryBySpinning(Stock stock, Integer retry) {

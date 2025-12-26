@@ -45,4 +45,6 @@ public interface IStockService extends IService<Stock> {
      * @return: void
      **/
     public void optimisticRetryBySpinning(Long productId);
+
+    void modifyName(Long productId, String modifyName);
 }

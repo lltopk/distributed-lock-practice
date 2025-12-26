@@ -21,6 +21,31 @@ update stock set count = count - 1 where product_id = 1 and count > 0;
 </update>
 ```
 
+此时再有第二个并发请求对该记录行进行修改, 则会被阻塞
+```java
+/**
+ * for update 悲观锁
+ * @param productId
+ * @return
+ */
+@GetMapping("/stock/deductForUpdate")
+public String deductForUpdate(@RequestParam("productId") Long productId){
+    stockService.deductForUpdate(productId);
+    return "hello stock deduct！！";
+}
+
+/**
+ * 被阻塞
+ * @param productId
+ * @return
+ */
+@GetMapping("/stock/deductForUpdate/concurentModify")
+public String concurentModify(@RequestParam("productId") Long productId){
+    stockService.modifyName(productId,"modifyName");
+    return "modifyName";
+}
+```
+
 3. 乐观锁版本号字段
 ```sql
 <update id="updateStockOptimistic">

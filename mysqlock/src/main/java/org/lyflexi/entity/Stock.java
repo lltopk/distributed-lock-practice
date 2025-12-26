@@ -8,4 +8,5 @@ public class Stock {
     private Long productId;
     private Long count;
     private Long version;
+    private String name;
 }

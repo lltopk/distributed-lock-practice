@@ -25,6 +25,11 @@ public class MockController {
         stockService.deductForUpdate(productId);
         return "hello stock deduct！！";
     }
+    @GetMapping("/stock/deductForUpdate/concurentModify")
+    public String concurentModify(@RequestParam("productId") Long productId){
+        stockService.modifyName(productId,"modifyName");
+        return "modifyName";
+    }
 
 
     @GetMapping("/stock/deductOptimistic")
