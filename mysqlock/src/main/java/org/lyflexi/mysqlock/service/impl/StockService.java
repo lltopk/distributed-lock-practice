@@ -102,6 +102,7 @@ public class StockService extends ServiceImpl<StockMapper, Stock> implements ISt
             //再次查出来, 确保新一轮的重试
             stock = this.getOne(Wrappers.<Stock>lambdaQuery()
                     .eq(Stock::getProductId, productId));
+            stock.setCount(stock.getCount()-1);
             log.info("乐观锁自旋重试：当前商品：{}",productId);
         }while (retry > 0);
     }

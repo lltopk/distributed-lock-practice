@@ -26,7 +26,7 @@ public interface IStockService extends IService<Stock> {
      * mysql乐观锁：版本号机制
      * @param productId
      */
-    public void optimisticRetryByRecursive(Long productId, Integer version);
+    public void optimisticRetryByRecursive(Long productId, Integer retry);
 
     /**
      * @description: mysql乐观锁：版本号机制 往往搭配重试机制，这里使用自旋重试

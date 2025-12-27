@@ -1,6 +1,8 @@
 ## mysql分布式锁
 MySQL自身有3种分布式锁方案：
 
+单元测试见: [mysqlock](mysqlock/src/test/java/org/lyflexi/mysqlock)
+
 ### update瞬时行锁
 1. InnoDB存储引擎在执行记录行更新的时候会自动添加排他锁。利用这一特性，我们可以解决超卖问题，具体SQL如下：
 
