@@ -31,22 +31,17 @@ public class MockController {
         return "modifyName";
     }
 
-
-    @GetMapping("/stock/deductOptimistic")
-    public String deductOptimistic(@RequestParam("productId") Long productId){
-        stockService.deductOptimistic(productId);
-        return "hello stock deduct！！";
-    }
-
+    private static final Integer retry = 10;
     @GetMapping("/stock/optimisticRetryByRecursive")
-    public String optimisticRetryByRecursive(@RequestParam("productId") Long productId){
-        stockService.optimisticRetryByRecursive(productId);
+    public String deductOptimistic(@RequestParam("productId") Long productId){
+        stockService.optimisticRetryByRecursive(productId,retry);
         return "hello stock deduct！！";
     }
+
 
     @GetMapping("/stock/optimisticRetryBySpinning")
     public String optimisticRetryBySpinning(@RequestParam("productId") Long productId){
-        stockService.optimisticRetryBySpinning(productId);
+        stockService.optimisticRetryBySpinning(productId,retry);
         return "hello stock deduct！！";
     }
 

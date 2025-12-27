@@ -49,13 +49,9 @@ public class StockService extends ServiceImpl<StockMapper, Stock> implements ISt
         }
     }
 
-    /**
-     * 注意这里不能加事务，否则乐观锁将会失效，cpu会飙高
-     * @param productId
-     */
-    @Override
-    public void deductOptimistic(Long productId) {
 
+    @Override
+    public void optimisticRetryByRecursive(Long productId,Integer retry) {
         Stock stock = null;
         try {
             stock = this.getOne(Wrappers.<Stock>lambdaQuery()
@@ -67,15 +63,22 @@ public class StockService extends ServiceImpl<StockMapper, Stock> implements ISt
             stock.setCount(stock.getCount()-1);
             //返回0表示cas失败
             if (this.baseMapper.updateStockOptimistic(stock) == 0){
-                log.info("乐观锁重试：当前商品：{}",productId);
-                deductOptimistic(productId);
+                if(retry>0){
+                    retry--;
+                    optimisticRetryByRecursive(productId,retry);
+                    log.info("乐观锁重试：当前商品：{}",productId);
+                }
             }
+            log.info("乐观锁更新成功：当前商品：{}",productId);
+            return;
         }
     }
 
-    private static final Integer retry = 10;
+
+
+
     @Override
-    public void optimisticRetryByRecursive(Long productId) {
+    public void optimisticRetryBySpinning(Long productId,Integer retry) {
         Stock stock = null;
         try {
             stock = this.getOne(Wrappers.<Stock>lambdaQuery()
@@ -87,33 +90,7 @@ public class StockService extends ServiceImpl<StockMapper, Stock> implements ISt
         if (stock == null) {
             return;
         }
-        doRetryByRecursive(stock,retry);
-    }
-
-    @Override
-    public void optimisticRetryBySpinning(Long productId) {
-        Stock stock = null;
-        try {
-            stock = this.getOne(Wrappers.<Stock>lambdaQuery()
-                    .eq(Stock::getProductId, productId));
-        } catch (Exception e) {
-            throw new RuntimeException("getOne库存异常");
-        }
-
-        if (stock == null) {
-            return;
-        }
-        doRetryBySpinning(stock,retry);
-    }
-
-    @Override
-    public void modifyName(Long productId, String modifyName) {
-        this.baseMapper.modifyName(productId,modifyName);
-    }
-
-    private void doRetryBySpinning(Stock stock, Integer retry) {
         stock.setCount(stock.getCount()-1);
-        Long productId = stock.getProductId();
         do{
             //返回0表示cas失败
             int flag = this.baseMapper.updateStockOptimistic(stock);
@@ -122,26 +99,16 @@ public class StockService extends ServiceImpl<StockMapper, Stock> implements ISt
                 break;
             }
             retry--;
+            //再次查出来, 确保新一轮的重试
+            stock = this.getOne(Wrappers.<Stock>lambdaQuery()
+                    .eq(Stock::getProductId, productId));
             log.info("乐观锁自旋重试：当前商品：{}",productId);
         }while (retry > 0);
     }
 
-    private void doRetryByRecursive(Stock stock, int retry) {
-        stock.setCount(stock.getCount()-1);
-        Long productId = stock.getProductId();
-        //返回0表示cas失败
-        int flag = this.baseMapper.updateStockOptimistic(stock);
-        //cas成功
-        if (flag ==1 ) {
-            return;
-        }
-        //cas失败重试
-        if (retry > 0) {
-            retry--;
-            log.info("乐观锁递归重试：当前商品：{}",productId);
-            doRetryByRecursive(stock,retry);
-        }
-
+    @Override
+    public void modifyName(Long productId, String modifyName) {
+        this.baseMapper.modifyName(productId,modifyName);
     }
 
 }
