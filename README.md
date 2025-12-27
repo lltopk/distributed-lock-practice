@@ -86,7 +86,11 @@ public String concurentModify(@RequestParam("productId") Long productId){
 - 调度丢失	任务没执行
 - 主从切换异常	调度混乱
 
-这些 比慢 10ms 严重得多, 而且不引入redis等分布式锁也避免额外维护中间件
+这些 比慢 10ms 严重得多.
+
+**即便你有10 万个任务 也只是扫描任务时无锁 , 只有“抢调度权”这一步加锁**
+
+而且不引入redis等分布式锁也避免额外维护中间件
 
 ### 乐观策略version
 3. 乐观锁版本号字段
