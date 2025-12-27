@@ -4,11 +4,29 @@ MySQL自身有3种分布式锁方案：
 ### update瞬时行锁
 1. InnoDB存储引擎在执行记录行更新的时候会自动添加排他锁。利用这一特性，我们可以解决超卖问题，具体SQL如下：
 
-jmeter压测8000并发, 验证最终库存从8000减为0, 是安全的(如果再高的并发验证库存扣减失败, 很有可能是你本机tomcat不足以支撑这么高的并发, 请求失败导致的)
+jmeter压测8000并发, 验证最终库存从8000减为0, 是安全的
 ```sql
 update stock set count = count - 1 where product_id = 1 and count > 0;
 ```
-但要使用sql来执行count = count - 1保证行锁加在该操作上, 如果在Java层执行count = count - 1需要额外加Java锁
+但要使用sql来执行count = count - 1保证行锁加在该操作上, 如果在Java层执行count = count - 1需要额外加Java锁.
+
+如果再高的并发验证库存扣减失败, 很有可能是你本机tomcat不足以支撑这么高的并发, 请求失败导致的. 可以单元测试模拟10000个线程来测试,验证最终库存从10000减为0
+```java
+    @Test
+    void contextLoads() {
+        CompletableFuture[] completableFutures = new CompletableFuture[10000];
+        for (int i = 0; i < 10000; i++) {
+            CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+                stockService.deductOneSql(1l);
+            });
+            completableFutures[i] = future;
+        }
+        CompletableFuture<Void> allOf = CompletableFuture.allOf(completableFutures);
+        allOf.join();
+    
+        log.info("end");
+    }
+```
 
 ## select...for update行锁
 2. for update显式加排他锁 + 普通的update语句
