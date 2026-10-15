@@ -53,10 +53,7 @@ xxljob的逻辑是, 需要保持锁持有状态, 并在这期间执行具体的�
     update stock set count = #{stock.count} where product_id = #{stock.productId}
 </update>
 
----第二个线程, 执行for update无法重复获取锁, 因此被阻塞在这里, 直到第一个线程完成更新后释放锁
-<select id="selectStockForUpdate" resultType="org.lyflexi.entity.Stock">
-    select * from stock where product_id = #{productId} for update
-</select>
+---第二个线程被阻塞在这里, 直到第一个线程完成更新后释放锁
 <update id="updateStock">
     update stock set count = #{stock.count} where product_id = #{stock.productId}
 </update>
