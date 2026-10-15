@@ -6,8 +6,6 @@ import org.lyflexi.mysqlock.service.IStockService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @SpringBootTest
@@ -30,7 +28,7 @@ class _03_MysqlOptimisticLockTests {
             CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
                 //重试1000次, 保证都成功
                 //实际生产不可这样 , 递归容易OOM
-                stockService.optimisticRetryByRecursive(1l,1000);
+                stockService.tryDeductByRecursive(1l,1000);
             });
             completableFutures[i] = future;
         }
@@ -53,7 +51,7 @@ class _03_MysqlOptimisticLockTests {
             CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
                 //重试1000次, 保证都成功
                 //实际生产不可这样 , 自旋容易CPU UP UP
-                stockService.optimisticRetryBySpinning(1l,1000);
+                stockService.tryDeductBySpinning(1l,1000);
             });
             completableFutures[i] = future;
         }

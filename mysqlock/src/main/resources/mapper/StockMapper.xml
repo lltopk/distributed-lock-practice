@@ -3,7 +3,7 @@
 <mapper namespace="org.lyflexi.mysqlock.mapper.StockMapper">
 
     <update id="updateStockOneSql">
-        update stock set count = count - 1  where product_id = #{stock.productId}
+        update stock set count = count - #{decreaseSize}  where product_id = #{productId}
     </update>
 
     <select id="selectStockForUpdate" resultType="org.lyflexi.entity.Stock">

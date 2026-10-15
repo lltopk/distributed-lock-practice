@@ -25,23 +25,18 @@ public class MockController {
         stockService.deductForUpdate(productId);
         return "hello stock deduct！！";
     }
-    @GetMapping("/stock/deductForUpdate/concurentModify")
-    public String concurentModify(@RequestParam("productId") Long productId){
-        stockService.modifyName(productId,"modifyName");
-        return "modifyName";
-    }
 
     private static final Integer retry = 10;
     @GetMapping("/stock/optimisticRetryByRecursive")
     public String deductOptimistic(@RequestParam("productId") Long productId){
-        stockService.optimisticRetryByRecursive(productId,retry);
+        stockService.tryDeductByRecursive(productId,retry);
         return "hello stock deduct！！";
     }
 
 
     @GetMapping("/stock/optimisticRetryBySpinning")
     public String optimisticRetryBySpinning(@RequestParam("productId") Long productId){
-        stockService.optimisticRetryBySpinning(productId,retry);
+        stockService.tryDeductBySpinning(productId,retry);
         return "hello stock deduct！！";
     }
 
